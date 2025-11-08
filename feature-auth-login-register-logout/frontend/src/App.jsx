@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
+import AppRoutes from "./routes/AppRoutes";
 import { login, signup, logout as logoutApi } from "./api/auth";
 
 export default function App() {
@@ -74,7 +75,7 @@ export default function App() {
           <>
             <Navbar onLogout={handleLogout} user={user} />
             <main className="container">
-              <Dashboard user={user} />
+              <AppRoutes user={user} />
             </main>
           </>
         ) : (
