@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Login from "./pages/auth/Login";
+import Dashboard from "./pages/Dashboard";
+import AppRoutes from "./routes/AppRoutes";
 import { login, signup, logout as logoutApi } from "./api/auth";
 
 export default function App() {
@@ -73,10 +75,7 @@ export default function App() {
           <>
             <Navbar onLogout={handleLogout} user={user} />
             <main className="container">
-              <div style={{ padding: "20px" }}>
-                <h1>Dashboard</h1>
-                <p>Welcome, {user?.username || "User"}!</p>
-              </div>
+              <AppRoutes user={user} />
             </main>
           </>
         ) : (

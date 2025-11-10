@@ -12,7 +12,10 @@ export default function Sources() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(false);
+<<<<<<< HEAD
   const [popupMessage, setPopupMessage] = useState("");
+=======
+>>>>>>> 699b53f6bdb99de7fdb6824de5da65c4d7809dea
 
   // ✅ Identify current logged-in user
   const currentUser = localStorage.getItem("authUser") || "guest";
@@ -96,7 +99,11 @@ export default function Sources() {
     try {
       const handle = await window.showDirectoryPicker();
       if (handle.name !== src.name) {
+<<<<<<< HEAD
         alert("Selected folder name doesn't match. Please pick the same folder.");
+=======
+        alert("Selected folder name doesn’t match. Please pick the same folder.");
+>>>>>>> 699b53f6bdb99de7fdb6824de5da65c4d7809dea
         return;
       }
 
