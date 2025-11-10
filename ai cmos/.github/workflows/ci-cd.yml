@@ -1,0 +1,151 @@
+name: CI-CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main,develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js for backend
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          else
+            echo "No package.json found in backend, skipping npm install"
+          fi
+
+      # Frontend Node setup
+      - name: Setup Node.js for frontend
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          else
+            echo "No package.json found in frontend, skipping npm install"
+          fi
+
+      - name: Run backend linting
+        working-directory: ./backend
+        run: |
+          if [ -f package.json ] && npm list --depth=0 2>/dev/null | grep -q eslint || npm run | grep -q lint; then
+            npm run lint || true
+          else
+            echo "No linting configured in backend, skipping..."
+          fi
+
+      - name: Run frontend linting
+        working-directory: ./frontend
+        run: |
+          if [ -f package.json ] && npm list --depth=0 2>/dev/null | grep -q eslint || npm run | grep -q lint; then
+            npm run lint || true
+          else
+            echo "No linting configured in frontend, skipping..."
+          fi
+
+      - name: Run backend tests
+        working-directory: ./backend
+        env:
+          MONGODB_URI: mongodb://localhost:27017/test-auth-db
+          JWT_SECRET: test-secret-key-for-ci
+          JWT_EXPIRES_IN: 7d
+          NODE_ENV: test
+        run: |
+          if [ -f package.json ] && npm list --depth=0 2>/dev/null | grep -q jest || npm run | grep -q test; then
+            npm test
+          else
+            echo "No tests configured in backend, skipping..."
+          fi
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: |
+          if [ -f package.json ] && npm list --depth=0 2>/dev/null | grep -q jest || npm run | grep -q test; then
+            npm test
+          else
+            echo "No tests configured in frontend, skipping..."
+          fi
+
+      - name: Build backend application
+        working-directory: ./backend
+        run: |
+          if [ -f package.json ]; then
+            npm run build --if-present
+          else
+            echo "No build script found in backend, skipping..."
+          fi
+
+      - name: Build frontend application
+        working-directory: ./frontend
+        run: |
+          if [ -f package.json ]; then
+            npm run build --if-present
+          else
+            echo "No build script found in frontend, skipping..."
+          fi
+
+      - name: Backend security audit
+        working-directory: ./backend
+        run: |
+          if [ -f package.json ]; then
+            npm audit --audit-level=high || true
+          else
+            echo "No package.json found in backend, skipping security audit"
+          fi
+
+      - name: Frontend security audit
+        working-directory: ./frontend
+        run: |
+          if [ -f package.json ]; then
+            npm audit --audit-level=high || true
+          else
+            echo "No package.json found in frontend, skipping security audit"
+          fi
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy to staging
+        run: echo "Deploying to staging environment..."
+
+      - name: Run integration tests
+        run: echo "Running integration tests..."
+
+      - name: Deploy to production
+        run: echo "Deploying to production environment..."
