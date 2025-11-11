@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAllFolderHandles } from "../utils/fsStorage";
 import { extractFileData } from "../utils/fileProcessor";
+import { findDuplicates, hammingDistance } from "../utils/duplicate";
 
 export default function Library() {
   const [files, setFiles] = useState([]);
@@ -38,7 +39,25 @@ export default function Library() {
         }
       }
 
-      if (!stop) setFiles(results);
+      // After collecting all file data, run duplicate detection across the set
+      try {
+        const augmented = results.map((file) => ({ ...file }));
+        for (let i = 0; i < augmented.length; i++) {
+          const file = augmented[i];
+          const others = augmented.filter((_, idx) => idx !== i);
+          const dup = findDuplicates(others, file.fingerprint, 3);
+          file.isExactDuplicate = dup.exact.length > 0;
+          file.duplicateOf = dup.exact.length > 0 ? dup.exact[0].name : null;
+          file.nearDuplicates = dup.near.map((d) => ({ 
+            name: d.name,
+            similarity: `${((1 - hammingDistance(file.fingerprint.simhash, d.fingerprint.simhash) / 64) * 100).toFixed(1)}%`
+          }));
+        }
+        if (!stop) setFiles(augmented);
+      } catch (e) {
+        console.warn("Duplicate detection failed:", e);
+        if (!stop) setFiles(results);
+      }
     } catch (error) {
       console.error("Error while loading folders:", error);
     }
@@ -84,19 +103,58 @@ export default function Library() {
         <div className="grid">
           {filtered.map((file, i) => (
             <div key={i} className="card">
-              <h3>{file.name}</h3>
-              <p>Type: {file.type}</p>
-              <p>Language: {file.language}</p>
-              <p
-                style={{
-                    whiteSpace: "pre-wrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    maxHeight: "4.5em", // roughly 3 lines
-                }}
-                >
-                    {file.textSnippet}
-                </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0 }}>{file.name}</h3>
+              </div>
+              <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {file.isExactDuplicate && file.duplicateOf && (
+                  <div style={{ 
+                    background: '#ffdddd', 
+                    color: '#900', 
+                    padding: '4px 8px', 
+                    borderRadius: 4, 
+                    fontSize: 12,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4
+                  }}>
+                    <span style={{ fontWeight: 'bold' }}>Exact duplicate of:</span> {file.duplicateOf}
+                  </div>
+                )}
+                {file.nearDuplicates && file.nearDuplicates.length > 0 && (
+                  <div style={{ 
+                    background: '#fff6df', 
+                    color: '#665200', 
+                    padding: '4px 8px', 
+                    borderRadius: 4, 
+                    fontSize: 12,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2
+                  }}>
+                    <span style={{ fontWeight: 'bold' }}>Similar to:</span>
+                    <ul style={{ margin: 0, paddingLeft: 20 }}>
+                      {file.nearDuplicates.map((n, i) => (
+                        <li key={i}>{n.name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <div style={{ marginTop: 8 }}>
+                <p>Type: {file.type}</p>
+                <p>Language: {file.language}</p>
+                <p
+                  style={{
+                      whiteSpace: "pre-wrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxHeight: "4.5em", // roughly 3 lines
+                  }}
+                  >
+                      {file.textSnippet}
+                  </p>
+              </div>
             </div>
           ))}
         </div>

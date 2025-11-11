@@ -1,5 +1,6 @@
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
 import pdfWorker from "pdfjs-dist/build/pdf.worker.entry";
+import { fnv1a64FromBuffer, fnv1a64FromString, simhash64 } from "./duplicate";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
@@ -36,6 +37,29 @@ export async function extractFileData(entry) {
 
     const visibleText = text.length > 500 ? text.slice(0, 500) + "..." : text;
 
+    // Compute lightweight fingerprints
+    let hash = null;
+    try {
+      // Prefer hashing the fullText for text files, otherwise raw bytes
+      if (text && text.length > 0) {
+        hash = fnv1a64FromString(text);
+      } else {
+        const ab = await file.arrayBuffer();
+        hash = fnv1a64FromBuffer(new Uint8Array(ab));
+      }
+    } catch (e) {
+      console.warn("Hashing failed:", e);
+      hash = null;
+    }
+
+    let simhash = null;
+    try {
+      simhash = simhash64(text || "");
+    } catch (e) {
+      console.warn("SimHash failed:", e);
+      simhash = null;
+    }
+
     return {
       name: fileName,
       type,
@@ -44,6 +68,7 @@ export async function extractFileData(entry) {
       language: "Unknown",
       textSnippet: visibleText,
       fullText: text,
+      fingerprint: { hash, simhash },
       meta: { name: fileName, type, size: file.size, lastModified: file.lastModified },
     };
   } catch (err) {

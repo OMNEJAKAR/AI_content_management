@@ -2,6 +2,7 @@ import * as pdfjsLib from "pdfjs-dist/build/pdf";
 import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
 import { loadModule } from "cld3-asm";
 import { franc } from "franc";
+import { calculateHash, calculateSimHash } from "./duplicate";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
@@ -139,6 +140,10 @@ export async function extractFileData(entry) {
       language: detectedLang,
       textSnippet: visibleText,
       fullText: text,
+      fingerprint: {
+        hash: calculateHash(text || ''),
+        simhash: calculateSimHash(text || '')
+      },
       meta: {
         name: fileName,
         type,

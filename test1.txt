@@ -1,0 +1,5 @@
+This is a sample document for testing duplicate detection.
+It contains some specific content that we can use to test both exact and near-duplicate matching.
+
+The quick brown fox jumps over the lazy dog.
+This is a unique paragraph that will help identify this document.

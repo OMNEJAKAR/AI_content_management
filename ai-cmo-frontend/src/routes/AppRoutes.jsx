@@ -5,7 +5,8 @@ import Library from "../pages/Library";
 import DocumentViewer from "../pages/DocumentViewer";
 import Sources from "../pages/Sources";
 import AdminConsole from "../pages/AdminConsole";
-import LocalViewer from "../pages/LocalViewer"; // 🆕
+import LocalViewer from "../pages/LocalViewer";
+import DuplicateTest from "../pages/DuplicateTest";
 
 export default function AppRoutes() {
   return (
@@ -14,8 +15,9 @@ export default function AppRoutes() {
       <Route path="/library" element={<Library />} />
       <Route path="/document/:id" element={<DocumentViewer />} />
       <Route path="/sources" element={<Sources />} />
-      <Route path="/local/:id" element={<LocalViewer />} /> {/* 🆕 */}
+      <Route path="/local/:id" element={<LocalViewer />} />
       <Route path="/admin" element={<AdminConsole />} />
+      <Route path="/duplicate-test" element={<DuplicateTest />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

@@ -3,11 +3,7 @@ import { Link } from "react-router-dom";
 import { deleteFolderHandle } from "../utils/fsStorage";
 import { logAudit } from "../utils/audit";
 
-<<<<<<< HEAD
-export default function Dashboard() {
-=======
 export default function Dashboard({ user }) {
->>>>>>> 699b53f6bdb99de7fdb6824de5da65c4d7809dea
   const [sharedSpaces] = useState([]); // backend later
   const [localSources, setLocalSources] = useState([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
@@ -27,10 +23,7 @@ export default function Dashboard({ user }) {
   }, []);
 
   const removeLocalSource = async (id) => {
-<<<<<<< HEAD
-=======
     // if (!window.confirm("Remove this folder from Local Spaces?")) return;
->>>>>>> 699b53f6bdb99de7fdb6824de5da65c4d7809dea
     const currentUser = localStorage.getItem("authUser") || "guest";
     const removed = localSources.find((s) => s.id === id);
     const updated = localSources.filter((s) => s.id !== id);
@@ -48,19 +41,12 @@ export default function Dashboard({ user }) {
     logAudit("source_deleted", { id, name: removed?.name });
   };
 
-<<<<<<< HEAD
-  return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Welcome, Admin 👋</p>
-=======
   const username = user?.username || JSON.parse(localStorage.getItem("user") || "null")?.username || "Admin";
 
   return (
     <div>
       <h1>Dashboard</h1>
       <p>Welcome, {username}!</p>
->>>>>>> 699b53f6bdb99de7fdb6824de5da65c4d7809dea
 
       {/* Shared Spaces */}
       <section style={{ marginTop: "20px" }}>
@@ -84,11 +70,7 @@ export default function Dashboard({ user }) {
       <section style={{ marginTop: "30px" }}>
         <h2>Local Spaces</h2>
         {localSources.length === 0 ? (
-<<<<<<< HEAD
-          <p>No local folders yet. Add one in "Sources."</p>
-=======
           <p>No local folders yet. Add one in “Sources.”</p>
->>>>>>> 699b53f6bdb99de7fdb6824de5da65c4d7809dea
         ) : (
           <div className="grid">
             {localSources.map((source) => {

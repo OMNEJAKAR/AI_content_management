@@ -5,6 +5,7 @@ import Library from "../pages/Library";
 import DocumentViewer from "../pages/DocumentViewer";
 import Sources from "../pages/Sources";
 import LocalViewer from "../pages/LocalViewer";
+import DuplicateTest from "../pages/DuplicateTest";
 
 export default function AppRoutes({ user }) {
   return (
@@ -14,6 +15,7 @@ export default function AppRoutes({ user }) {
   <Route path="/document/:id" element={<DocumentViewer />} />
   <Route path="/sources" element={<Sources />} />
   <Route path="/local/:id" element={<LocalViewer />} />
+  <Route path="/duplicate-test" element={<DuplicateTest />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

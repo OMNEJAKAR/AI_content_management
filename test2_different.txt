@@ -1,0 +1,5 @@
+This is a completely different document.
+It has entirely unique content that should not match the other test files.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Nothing in this file should trigger the duplicate detection.
